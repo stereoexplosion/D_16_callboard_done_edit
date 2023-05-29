@@ -1,0 +1,21 @@
+{% extends 'flatpages/default.html' %}
+
+{% load custom_tags %}
+
+{% block title %}
+Подписка
+{% endblock title %}
+
+{% block content %}
+<hr class="my-4" />
+Подпишитесь на ежедневную рассылку новых объявлений!
+<hr class="my-4" />
+<form method="post">
+{% csrf_token %}
+        {% if user_subscribed %}
+                <button disabled>Подписаться</button> <button type="submit" name="action" value="unsubscribe">Отписаться</button>
+        {% else %}
+                <button type="submit" name="action" value="subscribe">Подписаться</button> <button disabled>Отписаться</button>
+        {% endif %}
+</form>
+{% endblock content %}

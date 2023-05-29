@@ -1,0 +1,25 @@
+{% extends 'registration/base.html' %}
+
+{% load custom_tags %}
+
+{% block title %}
+Подтверждение
+{% endblock title %}
+
+{% block content %}
+На указанную вами почту мы выслали код подтверждения. Пожалуйста, введите его для завершения регистрации.
+Обратите внимание: время действия кода ограничено 5 минутами!
+<hr class="my-4" />
+<form method="post">
+{% csrf_token %}
+    <p>Введите ваш никнейм:<Br>
+    <textarea name="username" cols="40" rows="3"></textarea></p>
+    <p>Введите код:<Br>
+    <textarea name="code" cols="40" rows="3"></textarea></p>
+    <p><input type="submit" value="Отправить">
+</form>
+Истекло время кода? Вышлем ещё один!
+<a href="http://127.0.0.1:8000/accounts/signup/code/again" class="btn">Получить код ещё раз</a>
+
+{% endblock content %}
+

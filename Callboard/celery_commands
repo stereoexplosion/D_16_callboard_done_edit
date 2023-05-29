@@ -1,0 +1,10 @@
+Привет виндовс, команда для запуска задачи отправки письма сабам о новом посте:
+
+celery -A Callboard worker --pool=solo -l info
+
+
+Для запуска периодических задач на Windows запустите в разных окнах терминала:
+
+celery -A Callboard worker --pool=solo -l INFO
+и
+celery -A Callboard beat -l INFO

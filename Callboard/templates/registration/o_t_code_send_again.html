@@ -1,0 +1,20 @@
+{% extends 'registration/base.html' %}
+
+{% load custom_tags %}
+
+{% block title %}
+Код
+{% endblock title %}
+
+{% block content %}
+<hr class="my-4" />
+<form action="." method="post">
+    {% csrf_token %}
+        <p>Введите вашу почту:<Br>
+        <textarea name="email" cols="40" rows="3"></textarea></p>
+        <p><input type="submit" value="Отправить">
+</form>
+</form>
+<hr class="my-4" />
+
+{% endblock content %}

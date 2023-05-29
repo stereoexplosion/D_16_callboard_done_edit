@@ -1,0 +1,21 @@
+{% extends 'flatpages/default.html' %}
+
+{% block title %}
+Недостаточно прав!
+{% endblock title %}
+
+<style>
+    .btn {
+    display: inline-block; /* Строчно-блочный элемент */
+    background: #8C959D; /* Серый цвет фона */
+    color: #fff; /* Белый цвет текста */
+    padding: 1rem 1.5rem; /* Поля вокруг текста */
+    text-decoration: none; /* Убираем подчёркивание */
+    border-radius: 3px; /* Скругляем уголки */
+    }
+</style>
+
+{% block content %}
+Недостаточно прав доступа для действия или неавторизованный аккаунт...
+<a href="http://127.0.0.1:8000/accounts/login" class="btn">Авторизация</a>   <a href="http://127.0.0.1:8000/accounts/signup" class="btn">Регистрация аккаунта</a>
+{% endblock content %}

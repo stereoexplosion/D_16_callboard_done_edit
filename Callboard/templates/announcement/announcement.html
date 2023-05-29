@@ -1,0 +1,87 @@
+{% extends 'flatpages/default.html' %}
+
+{% block title %}
+Объявления
+{% endblock title %}
+<style>
+    .btn {
+    display: inline-block; /* Строчно-блочный элемент */
+    background: #8C959D; /* Серый цвет фона */
+    color: #fff; /* Белый цвет текста */
+    padding: 1rem 1.5rem; /* Поля вокруг текста */
+    text-decoration: none; /* Убираем подчёркивание */
+    border-radius: 3px; /* Скругляем уголки */
+    }
+</style>
+
+{% block content %}
+<h5>Объявление пользователя {{ announcement.a_author }} в категории {{ announcement.get_category_choice_display }} </h5>
+<h5>Дата публикации: {{ announcement.a_create_time }}</h5>
+<hr class="my-4" />
+<h2>{{ announcement.a_header }}</h2>
+<hr>
+ <div class="article-body">
+     {{announcement.a_body|safe}}
+ </div>
+{% if request.user.id == announcement.a_author_id %}
+    <a href="{% url 'announcement_edit' pk=announcement.id %}">Редактировать</a>     |     <a href="{% url 'announcement_delete' pk=announcement.id %}">Удалить</a>
+{% endif %}
+<hr class="my-4" />
+{% for response in responses %}
+    <div class="response">
+        <p class="info">
+            Отклик, написанный {{ response.r_author }}
+            {{ response.r_create_time }}
+        </p>
+        <h2>{{ response.r_text|linebreaks }}</h2>
+        <p>
+            {% if response.accept_decline is True %}
+                <h2 style="color:#006400">Принят</h2>
+            {% elif response.accept_decline is False %}
+                <h2 style="color:#8B0000">Отклонён</h2>
+            {% else %}
+                <h2 style="color:#FFA500">В ожидании</h2>
+            {% endif %}
+            {% if request.user.id == announcement.a_author_id %}
+                {% if response.accept_decline is not True and response.accept_decline is not False %}
+                    <a href="{% url 'response_update' response.id %}" class="btn">Изменить статус</a>
+                {% endif %}
+            {% endif %}
+        </p>
+        <hr class="my-4" />
+    </div>
+{% empty %}
+    <p>К этому объявлению ещё нет откликов</p>
+{% endfor %}
+{% if new_response %}
+    <h2>Ваш отклик добавлен</h2>
+{% else %}
+    <h2>Добавить новый Отклик</h2>
+    <form action="." method="post">
+        {{ response_form.as_p }}
+        {% csrf_token %}
+        <p><input type="submit" value="Добавить Отклик"></p>
+    </form>
+{% endif %}
+{# Информация о предыдущих страницах #}
+{% if page_obj.has_previous %}
+   <a href="?page=1">1</a>
+   {% if page_obj.previous_page_number != 1 %}
+       ...
+       <a href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+   {% endif %}
+{% endif %}
+
+{# Информация о текущей странице #}
+{{ page_obj.number }}
+
+{# Информация о следующих страницах #}
+{% if page_obj.has_next %}
+   <a href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+   {% if paginator.num_pages != page_obj.next_page_number %}
+       ...
+       <a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+   {% endif %}
+{% endif %}
+ <hr class="my-4" />
+{% endblock content %}

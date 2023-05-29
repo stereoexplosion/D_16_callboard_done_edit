@@ -1,0 +1,27 @@
+{% extends 'registration/base.html' %}
+
+{% block content %}
+  <a href="/accounts/login">Логин</a>
+  <h2>Регистрация</h2>
+  <form method="post">
+    {% csrf_token %}
+      {% for field in form %}
+      <p>
+        {{ field.label_tag }}<br>
+        {{ field }}
+        {% if field.help_text %}
+          <small style="display: none">{{ field.help_text }}</small>
+        {% endif %}
+        {% for error in field.errors %}
+          <p style="color: red">{{ error }}</p>
+        {% endfor %}
+      </p>
+      {% endfor %}
+
+    <button type="submit">Зарегистрироваться</button>
+  </form>
+<a href="http://127.0.0.1:8000/acoounts/signup/code" class="btn">Подтвердить код</a>
+<hr class="my-4" />
+Истекло время кода? Вышлем ещё один!
+<a href="http://127.0.0.1:8000/accounts/signup/code/again" class="btn">Получить код ещё раз</a>
+{% endblock %}

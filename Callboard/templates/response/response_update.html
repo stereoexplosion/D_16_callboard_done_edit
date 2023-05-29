@@ -1,0 +1,17 @@
+{% extends 'flatpages/default.html' %}
+
+{% load custom_tags %}
+
+{% block title %}
+Измените статус здесь!
+{% endblock title %}
+
+{% block content %}
+<hr class="my-4" />
+<h2>Обратите внимание, статус отклика можно изменить лишь раз!</h2>
+<hr class="my-4" />
+<form method="post">
+{% csrf_token %}
+    <button type="submit" name="action" value="accept">Принять</button> <button type="submit" name="action" value="decline">Отклонить</button>
+</form>
+{% endblock content %}
