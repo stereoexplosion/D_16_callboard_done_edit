@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import Paginator
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
@@ -50,14 +51,40 @@ class AnnouncementsDetail(DetailView):
         context['response_form'] = ResponseForm
         return context
 
-    def post(self, request, *args, **kwargs):  # Принятие формы с комментарием, определение id поста и автора, редирект
-        if self.request.method == 'POST':  # обратно
+    def post(self, request, *args, **kwargs):
+        """Отправка письма реализована отвратительным брутфорсом, заранее извиняюсь :).
+        Причина: работаю на windows, при реализации через сигналы и celery, делал по примеру работающей аналогии
+        проекта NewsPaper, но столкнулся с [WinError 10061]. Разбор трэйсбеков и несколько часов гугла ничего не дали.
+        Из-за дедлайна и общей нехватки времени решился хоть на какую реализацию.
+        """
+        if self.request.method == 'POST':
             response_form = ResponseForm(data=self.request.POST)
             new_response = response_form.save(commit=False)
             new_response.r_announcement_id = self.get_object().id
             new_response.r_author_id = self.request.user.id
             pk = new_response.r_announcement_id
             new_response.save()
+            announcement_id = new_response.r_announcement_id
+            ann_author = Announcement.objects.filter(id=announcement_id).values_list('a_author_id', flat=True)
+            for _id in ann_author:
+                ann_author_email = list(User.objects.filter(id=_id).values_list('email', flat=True))
+            announcement_header = list(Announcement.objects.filter(id=announcement_id).
+                                       values_list('a_header', flat=True))
+            for announcement_header_ in announcement_header:
+                subject = f'Новый отклик в вашем объявлении: "{announcement_header_}"'
+            text_content = (
+                f'Превью: {new_response.preview}\n\n'
+                f'Ссылка на объявление: http://127.0.0.1:8000/announcements/{announcement_id}'
+            )
+            html_content = (
+                f'Превью: {new_response.preview} <br><br>'
+                f'<a href="http://127.0.0.1:8000/announcements/{announcement_id}">'
+                f'Ссылка на объявление</a>'
+            )
+            for email in ann_author_email:
+                msg = EmailMultiAlternatives(subject, text_content, None, [email])
+                msg.attach_alternative(html_content, "text/html")
+                msg.send()
             return redirect("http://127.0.0.1:8000/announcements/" + str(pk))
 
     def get_related_activities(self, context):  # Реализация пагинации для DetailView вручную
@@ -110,6 +137,11 @@ class AnnouncementPersonal(LoginRequiredMixin, ListView):
 @login_required
 @csrf_protect
 def accept_decline(request, pk):
+    """Отправка письма реализована отвратительным брутфорсом, заранее извиняюсь :).
+    Причина: работаю на windows, при реализации через сигналы и celery, делал по примеру работающей аналогии
+    проекта NewsPaper, но столкнулся с [WinError 10061]. Разбор трэйсбеков и несколько часов гугла ничего не дали.
+    Из-за дедлайна и общей нехватки времени решился хоть на какую реализацию.
+    """
     ann = Response.objects.filter(id=pk).values_list('r_announcement_id', flat=True)
     for ann_ in ann:
         ann_author = Announcement.objects.filter(id=ann_).values_list('a_author_id', flat=True)
@@ -119,6 +151,27 @@ def accept_decline(request, pk):
                 action = request.POST.get('action')
                 if action == 'accept':
                     Response.objects.filter(id=pk).update(accept_decline=True)
+                    for ann_ in ann:
+                        announcement_header = list(Announcement.objects.filter(id=ann_).
+                                                   values_list('a_header', flat=True))
+                    r_a_id = Response.objects.filter(id=pk).values_list('r_author_id', flat=True)
+                    for id_ in r_a_id:
+                        res_author_email = list(
+                            User.objects.filter(id=id_).values_list('email', flat=True))
+                    for announcement_header_ in announcement_header:
+                        for pk_ in ann:
+                            subject = f'Ваш отклик на объявление "{announcement_header_}" был принят!'
+                            text_content = (
+                                f'Ссылка на объявление: http://127.0.0.1:8000/announcements/{pk_}'
+                            )
+                            html_content = (
+                                f'<a href="http://127.0.0.1:8000/announcements/{pk_}">'
+                                f'Ссылка на объявление</a>'
+                            )
+                        for email in res_author_email:
+                            msg = EmailMultiAlternatives(subject, text_content, None, [email])
+                            msg.attach_alternative(html_content, "text/html")
+                            msg.send()
                 elif action == 'decline':
                     Response.objects.filter(id=pk).update(accept_decline=False)
 

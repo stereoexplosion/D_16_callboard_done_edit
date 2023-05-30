@@ -1,4 +1,4 @@
-{% extends 'registration/base.html' %}
+{% extends 'flatpages/default.html' %}
 
 {% block content %}
   <a href="/accounts/login">Логин</a>
@@ -20,7 +20,8 @@
 
     <button type="submit">Зарегистрироваться</button>
   </form>
-<a href="http://127.0.0.1:8000/acoounts/signup/code" class="btn">Подтвердить код</a>
+<hr class="my-4" />
+<a href="{% url 'code' %}" class="btn">Подтвердить код</a>
 <hr class="my-4" />
 Истекло время кода? Вышлем ещё один!
 <a href="http://127.0.0.1:8000/accounts/signup/code/again" class="btn">Получить код ещё раз</a>
